@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<resources>
+	<set path = "images" />
+	<atlas>
+		<image file="field.png"/>
+		<image id ="b_b" file = "b_b.png"/>	
+		<image id ="b_k" file = "b_k.png"/>
+		<image id ="b_n" file = "b_n.png"/>
+		<image id ="b_p" file = "b_p.png"/>
+		<image id ="b_q" file = "b_q.png"/>
+		<image id ="b_r" file = "b_r.png"/>
+		<image id ="w_b" file = "w_b.png"/>	
+		<image id ="w_k" file = "w_k.png"/>
+		<image id ="w_n" file = "w_n.png"/>
+		<image id ="w_p" file = "w_p.png"/>
+		<image id ="w_q" file = "w_q.png"/>
+		<image id ="w_r" file = "w_r.png"/>	
+	</atlas>
+	
+	<set path = "fonts" />
+	<font file="main.fnt" />	
+</resources>
