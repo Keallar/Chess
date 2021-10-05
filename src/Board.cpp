@@ -10,7 +10,7 @@ const Point dirDiagRightUp(1, -1);
 const Point dirDiagLeftDown(-1, 1);
 const Point dirDiagRightDown(1, 1);
 
-Board::Board() : _size(0, 0), _selected(0)
+Board::Board() : _size(0, 0), _selected(0), turn(eTurn::None)
 {
 }
 
@@ -40,21 +40,31 @@ void Board::init(int w, int h)
 	_view->setCallbackDoUpdate(CLOSURE(this, &Board::update));
 }
 
+struct swapData : public Object
+{
+	swapData(space* A, space* B) : a(A), b(B) {}
+	space* a;
+	space* b;
+};
+
 space* Board::getSpace(const Point& pos, bool check)
 {
-	if (pos.x < 0 || pos.y < 0) 
+	if (pos.x < 0 || pos.y < 0)
 		return 0;
-	if (pos.x > _size.x || pos.y > _size.y) 
+	if (pos.x > _size.x || pos.y > _size.y)
 		return 0;
 	space& sp = _field[pos.x + pos.y * _size.x];
 	if (check)
 	{
-		if (sp.figure->isDead())
-			return 0;
-		if (sp.figure->isExploiding())
-			return 0;
-		if (sp.figure->isMoving())
-			return 0;
+		if (sp.figure)
+		{
+			if (sp.figure->isDead())
+				return 0;
+			if (sp.figure->isExploiding())
+				return 0;
+			if (sp.figure->isMoving())
+				return 0;
+		}
 	}
 	return &sp;
 }
@@ -75,10 +85,15 @@ void Board::update(const UpdateState& us)
 	}
 }
 
-spTween Board::move(space& obj)
+spTween Board::move(space& obj, space& nPos)
 {
 	spTween tween;
-	tween = obj.figure->move(obj.pos);
+	Point spacePos = nPos.pos;
+	spacePos *= 80;
+	spacePos.x += 160;
+	tween = obj.figure->move(spacePos);
+	std::swap(obj.figure, nPos.figure);
+	tween->setDataObject(new swapData(&obj, &nPos));
 	return tween;
 }
 
@@ -86,36 +101,46 @@ void Board::touched(Event* event)
 {
 	TouchEvent* te = safeCast<TouchEvent*>(event);
 	Vector2 pos = te->localPosition;
-	std::cout << "x: " << pos.x << "y: " << pos.y;
 	Point spacePos;
 	spacePos.x = (int)(pos.x / FIGURE_SIZE.x);
 	spacePos.y = (int)(pos.y / FIGURE_SIZE.y);
 	space* sp = getSpace(spacePos);
 	if (_selected)
 	{
-		_selected->figure->unselect();
-		if (sp)	
+		if (sp)
 		{
+			_selected->figure->unselect();
 			Point dir = _selected->pos - sp->pos;
-			if (dir.x == 0 && abs(dir.y) == 1 ||
-					abs(dir.x) == 1 && dir.y == 0)
-			{
-				spTween tween = move(*_selected);
-			}
+			spTween tween = move(*_selected, *sp);
+			tween->setDoneCallback(CLOSURE(this, &Board::moved));
+			_selected = 0;
 		}
-		_selected = 0;
 	}
 	else
 	{
-		_selected = sp;
-		if (sp)
-			sp->figure->select();
+		if (sp->figure)
+		{
+			_selected = sp;
+			if (sp)
+			{
+				sp->figure->select();
+			}
+		}
 	}
 }
 
 void Board::moved(Event* event)
 {
+	TweenEvent* te = safeCast<TweenEvent*>(event);
+	spObject data = te->tween->getDataObject();
+	swapData* sw = safeCast<swapData*>(data.get());
+	space& a = *sw->a;
+	space& b = *sw->b;
+	std::vector<space*> spaces;
+	if (spaces.empty())
+	{
 
+	}
 }
 
 void Board::createPawns()

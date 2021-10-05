@@ -101,7 +101,7 @@ void Figure::exploded(Event* ev)
 
 void Figure::select()
 {
-	_view->addTween(Actor::TweenScale(1.1f), 500, -1, true);
+	_view->addTween(Actor::TweenScale(1.1f), 700, -1, true);
 }
 
 void Figure::unselect()

@@ -7,6 +7,13 @@ using namespace oxygine;
 
 DECLARE_SMART(Figure, spFigure);
 
+enum class eTurn
+{
+	None,
+	White,
+	Black
+};
+
 struct space
 {
 	Point pos;
@@ -31,7 +38,7 @@ private:
 	void createKings();
 
 	void update(const UpdateState& us);
-	spTween move(space& obj);
+	spTween move(space& obj, space& nPos);
 	void touched(Event*);
 	void moved(Event*);
 
@@ -40,5 +47,7 @@ private:
 	space* _selected;
 	Point _size;
 	spTween _current;
+
+	eTurn turn;
 };
 
