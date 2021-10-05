@@ -42,6 +42,8 @@ private:
 	void touched(Event*);
 	void moved(Event*);
 
+	space* collWithOpFigure(space& obj);
+
 	spSprite _view;
 	std::vector<space> _field;
 	space* _selected;

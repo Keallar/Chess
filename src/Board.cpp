@@ -34,6 +34,8 @@ void Board::init(int w, int h)
 	createQueens();
 	createKings();
 
+	turn = eTurn::White;	
+
 	_view->setSize(_size.x * FIGURE_SIZE.x, _size.y * FIGURE_SIZE.y);
 	_view->addEventListener(TouchEvent::TOUCH_DOWN, CLOSURE(this, &Board::touched));
 	_view->setTouchChildrenEnabled(false);
@@ -69,8 +71,41 @@ space* Board::getSpace(const Point& pos, bool check)
 	return &sp;
 }
 
+space* Board::collWithOpFigure(space& obj)
+{
+	if (!obj.figure)
+		return nullptr;
+
+	if (obj.figure->isSelected())
+	{
+		Point objPos = obj.pos;
+		eColor objColor = obj.figure->getColor();
+		for (int y = 0; y < _size.y; ++y)
+		{
+			for (int x = 0; x < _size.x; ++x)
+			{
+				space& opSp = _field[x * y + _size.x];
+				if (opSp.figure)
+				{
+					eColor opColor = opSp.figure->getColor();
+					if (objColor != opColor)
+					{
+						Point opPos = opSp.pos;
+						if (objPos == opPos)
+						{
+							return &opSp;
+						}
+					}
+				}
+			}
+		}
+	}
+	return nullptr;
+}
+
 void Board::update(const UpdateState& us)
 {
+	//check isDead for figures
 	for (int y = 0; y < _size.y; ++y)
 	{
 		for (int x = 0; x < _size.x; ++x)
@@ -83,18 +118,19 @@ void Board::update(const UpdateState& us)
 				sp.figure = 0;
 		}
 	}
-}
-
-spTween Board::move(space& obj, space& nPos)
-{
-	spTween tween;
-	Point spacePos = nPos.pos;
-	spacePos *= 80;
-	spacePos.x += 160;
-	tween = obj.figure->move(spacePos);
-	std::swap(obj.figure, nPos.figure);
-	tween->setDataObject(new swapData(&obj, &nPos));
-	return tween;
+	//collision with opponent figures
+	for (int y = 0; y < _size.y; ++y)
+	{
+		for (int x = 0; x < _size.x; ++x)
+		{
+			space* sp = getSpace(Point(x, y));
+			if (!sp)
+				continue;
+			space* exSp = collWithOpFigure(*sp);
+			if (exSp)
+				exSp->figure->explode();
+		}
+	}
 }
 
 void Board::touched(Event* event)
@@ -111,9 +147,34 @@ void Board::touched(Event* event)
 		{
 			_selected->figure->unselect();
 			Point dir = _selected->pos - sp->pos;
+			eType selectedType = _selected->figure->getType();
 			spTween tween = move(*_selected, *sp);
 			tween->setDoneCallback(CLOSURE(this, &Board::moved));
 			_selected = 0;
+			if (selectedType == eType::Pawn)
+			{
+
+			}
+			else if (selectedType == eType::Rock)
+			{
+
+			}
+			else if (selectedType == eType::Bishop)
+			{
+
+			}
+			else if (selectedType == eType::Knight)
+			{
+
+			}
+			else if (selectedType == eType::Queen)
+			{
+
+			}
+			else if (selectedType == eType::King)
+			{
+
+			}
 		}
 	}
 	else
@@ -129,6 +190,18 @@ void Board::touched(Event* event)
 	}
 }
 
+spTween Board::move(space& obj, space& nPos)
+{
+	spTween tween;
+	Point spacePos = nPos.pos;
+	spacePos *= 80;
+	spacePos.x += 160;
+	tween = obj.figure->move(spacePos);
+	std::swap(obj.figure, nPos.figure);
+	tween->setDataObject(new swapData(&obj, &nPos));
+	return tween;
+}
+
 void Board::moved(Event* event)
 {
 	TweenEvent* te = safeCast<TweenEvent*>(event);
@@ -136,11 +209,7 @@ void Board::moved(Event* event)
 	swapData* sw = safeCast<swapData*>(data.get());
 	space& a = *sw->a;
 	space& b = *sw->b;
-	std::vector<space*> spaces;
-	if (spaces.empty())
-	{
-
-	}
+	//std::swap(a.pos, b.pos);
 }
 
 void Board::createPawns()

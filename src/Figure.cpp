@@ -3,7 +3,7 @@
 
 const Vector2 FIGURE_SIZE(80, 80);
 
-Figure::Figure(eColor color, eType t) : _dead(false), _moving(false), _exploiding(false)
+Figure::Figure(eColor color, eType t) : _dead(false), _moving(false), _exploiding(false), _selected(false)
 {
 	_color = color;
 	_type = t;
@@ -91,28 +91,38 @@ void Figure::moved(Event* ev)
 void Figure::explode()
 {
 	_dead = true;
-	_view->detach();
+	spTween tween = _view->addTween(Actor::TweenY(1.f), 500);
+	_view->addTween(Actor::TweenAlpha(0), 500);
+	tween->setDoneCallback(CLOSURE(this, &Figure::exploded));
 }
 
 void Figure::exploded(Event* ev)
 {
 	_exploiding = false;
+	_view->detach();
 }
 
 void Figure::select()
 {
 	_view->addTween(Actor::TweenScale(1.1f), 700, -1, true);
+	_selected = true;
 }
 
 void Figure::unselect()
 {
 	_view->removeTweens(false);
 	_view->addTween(Actor::TweenScale(1.0f), 250);
+	_selected = false;
 }
 
 void Figure::setPos(const float x, const float y)
 {
 	_view->setPosition(x, y);
+}
+
+bool Figure::isSelected() const
+{
+	return _selected;
 }
 
 bool Figure::isMoving() const
@@ -133,6 +143,11 @@ bool Figure::isExploiding() const
 eType Figure::getType() const
 {
 	return _type;
+}
+
+eColor Figure::getColor() const
+{
+	return _color;
 }
 
 spActor Figure::getView() const 

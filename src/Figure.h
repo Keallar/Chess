@@ -32,9 +32,11 @@ public:
 	void setPos(const float x, const float y);
 	spActor getView() const;
 	eType getType() const;
+	eColor getColor() const;
 	bool isExploiding() const;
 	bool isDead() const;
 	bool isMoving() const;
+	bool isSelected() const;
 	void select();
 	void unselect();
 	spTween move(const Vector2& pos);
@@ -43,6 +45,7 @@ private:
 	void moved(Event*);
 	void exploded(Event*);
 
+	bool _selected;
 	bool _dead;
 	bool _moving;
 	bool _exploiding;
