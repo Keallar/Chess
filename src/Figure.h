@@ -40,7 +40,6 @@ public:
 	spTween move(const Vector2& pos);
 	void explode();
 private:
-
 	void moved(Event*);
 	void exploded(Event*);
 

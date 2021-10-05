@@ -3,7 +3,7 @@
 
 const Vector2 FIGURE_SIZE(80, 80);
 
-Figure::Figure(eColor color, eType t) : _dead(false), _moving(false)
+Figure::Figure(eColor color, eType t) : _dead(false), _moving(false), _exploiding(false)
 {
 	_color = color;
 	_type = t;

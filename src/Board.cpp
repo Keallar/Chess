@@ -20,11 +20,11 @@ void Board::init(int w, int h)
 	_size.y = h;
 	_view = new Sprite;
 	_field.resize(_size.x * _size.y);
-	for (int i = 0; i < _size.y; ++i)
+	for (int y = 0; y < _size.y; ++y)
 	{
-		for (int j = 0; j < _size.x; ++j)
+		for (int x = 0; x < _size.x; ++x)
 		{
-			_field[j + i * _size.x].pos = Point(j, i);
+			_field[x + y * _size.x].pos = Point(x, y);
 		}
 	}
 	createPawns();
@@ -61,7 +61,18 @@ space* Board::getSpace(const Point& pos, bool check)
 
 void Board::update(const UpdateState& us)
 {
-
+	for (int y = 0; y < _size.y; ++y)
+	{
+		for (int x = 0; x < _size.x; ++x)
+		{
+			space& sp = _field[x * y + _size.x];
+			spFigure tempFig = sp.figure;
+			if (!tempFig)
+				continue;
+			if (tempFig->isDead())
+				sp.figure = 0;
+		}
+	}
 }
 
 spTween Board::move(space& obj)
@@ -92,14 +103,13 @@ void Board::touched(Event* event)
 				spTween tween = move(*_selected);
 			}
 		}
+		_selected = 0;
 	}
 	else
 	{
 		_selected = sp;
 		if (sp)
-		{
-			
-		}
+			sp->figure->select();
 	}
 }
 
