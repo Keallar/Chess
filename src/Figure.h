@@ -37,7 +37,10 @@ public:
 	bool isMoving() const;
 	void select();
 	void unselect();
+	spTween move(const Vector2& pos);
+	void explode();
 private:
+
 	void moved(Event*);
 	void exploded(Event*);
 

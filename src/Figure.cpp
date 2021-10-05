@@ -75,23 +75,39 @@ void Figure::init()
 	_view->setSize(80, 80);
 }
 
+spTween Figure::move(const Vector2& pos)
+{
+	_moving = true;
+	spTween tween = _view->addTween(Actor::TweenPosition(pos), 200);
+	tween->addDoneCallback(CLOSURE(this, &Figure::moved));
+	return tween;
+}
+
 void Figure::moved(Event* ev)
 {
+	_moving = false;
+}
 
+void Figure::explode()
+{
+	_dead = true;
+	_view->detach();
 }
 
 void Figure::exploded(Event* ev)
 {
-
-}
-
-void Figure::unselect()
-{
-
+	_exploiding = false;
 }
 
 void Figure::select()
 {
+	_view->addTween(Actor::TweenRotation(1), 500, -1, true);
+}
+
+void Figure::unselect()
+{
+	_view->removeTweens(false);
+	_view->addTween(Actor::TweenRotation(0), 250);
 }
 
 void Figure::setPos(const float x, const float y)

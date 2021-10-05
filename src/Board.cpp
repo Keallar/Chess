@@ -1,4 +1,14 @@
+#include <iostream>
 #include "Board.h"
+
+const Point dirUp(0, -1);
+const Point dirDown(0, 1);
+const Point dirLeft(-1, 0);
+const Point dirRight(1, 0);
+const Point dirDiagLeftUp(-1, -1);
+const Point dirDiagRightUp(1, -1);
+const Point dirDiagLeftDown(-1, 1);
+const Point dirDiagRightDown(1, 1);
 
 Board::Board() : _size(0, 0), _selected(0)
 {
@@ -25,14 +35,77 @@ void Board::init(int w, int h)
 	createKings();
 
 	_view->setSize(_size.x * FIGURE_SIZE.x, _size.y * FIGURE_SIZE.y);
-	//_view->addEventListener(TouchEvent::TOUCH_DOWN, CLOSURE(this, &Board::touched));
+	_view->addEventListener(TouchEvent::TOUCH_DOWN, CLOSURE(this, &Board::touched));
 	_view->setTouchChildrenEnabled(false);
 	_view->setCallbackDoUpdate(CLOSURE(this, &Board::update));
 }
 
 space* Board::getSpace(const Point& pos, bool check)
 {
-	return nullptr;
+	if (pos.x < 0 || pos.y < 0) 
+		return 0;
+	if (pos.x > _size.x || pos.y > _size.y) 
+		return 0;
+	space& sp = _field[pos.x + pos.y * _size.x];
+	if (check)
+	{
+		if (sp.figure->isDead())
+			return 0;
+		if (sp.figure->isExploiding())
+			return 0;
+		if (sp.figure->isMoving())
+			return 0;
+	}
+	return &sp;
+}
+
+void Board::update(const UpdateState& us)
+{
+
+}
+
+spTween Board::move(space& obj)
+{
+	spTween tween;
+	tween = obj.figure->move(obj.pos);
+	return tween;
+}
+
+void Board::touched(Event* event)
+{
+	TouchEvent* te = safeCast<TouchEvent*>(event);
+	Vector2 pos = te->localPosition;
+	std::cout << "x: " << pos.x << "y: " << pos.y;
+	Point spacePos;
+	spacePos.x = (int)(pos.x / FIGURE_SIZE.x);
+	spacePos.y = (int)(pos.y / FIGURE_SIZE.y);
+	space* sp = getSpace(spacePos);
+	if (_selected)
+	{
+		_selected->figure->unselect();
+		if (sp)	
+		{
+			Point dir = _selected->pos - sp->pos;
+			if (dir.x == 0 && abs(dir.y) == 1 ||
+					abs(dir.x) == 1 && dir.y == 0)
+			{
+				spTween tween = move(*_selected);
+			}
+		}
+	}
+	else
+	{
+		_selected = sp;
+		if (sp)
+		{
+			
+		}
+	}
+}
+
+void Board::moved(Event* event)
+{
+
 }
 
 void Board::createPawns()
@@ -42,7 +115,7 @@ void Board::createPawns()
 	{
 		_field[8 + i].figure = new Figure(eColor::White, eType::Pawn);
 		_field[8 + i].figure->init();
-		_field[8 + i].figure->setPos(160 + _field[8 + i].pos.x * FIGURE_SIZE.x, 
+		_field[8 + i].figure->setPos(160 + _field[8 + i].pos.x * FIGURE_SIZE.x,
 			_field[8 + i].pos.y * FIGURE_SIZE.y);
 		_field[8 + i].figure->getView()->attachTo(getStage());
 	}
@@ -51,7 +124,7 @@ void Board::createPawns()
 	{
 		_field[64 - 8 - j].figure = new Figure(eColor::Black, eType::Pawn);
 		_field[64 - 8 - j].figure->init();
-		_field[64 - 8 - j].figure->setPos(160 + _field[63 - 8 - j].pos.x * FIGURE_SIZE.x, 
+		_field[64 - 8 - j].figure->setPos(160 + _field[63 - 8 - j].pos.x * FIGURE_SIZE.x,
 			_field[63 - 8 - j].pos.y * FIGURE_SIZE.y);
 		_field[64 - 8 - j].figure->getView()->attachTo(getStage());
 	}
@@ -154,7 +227,7 @@ void Board::createQueens()
 }
 
 void Board::createKings()
-{	
+{
 	//create white
 	_field[4].figure = new Figure(eColor::White, eType::King);
 	_field[4].figure->init();
@@ -169,43 +242,6 @@ void Board::createKings()
 	_field[60].figure->getView()->attachTo(getStage());
 }
 
-void Board::update(const UpdateState& us)
-{
-
-}
-
-void Board::move(space& a, space& b)
-{
-
-}
-
-void Board::touched(Event* event)
-{
-	TouchEvent* te = safeCast<TouchEvent*>(event);
-	Vector2 pos = te->localPosition;
-	Point spacePos;
-	spacePos.x = (int)(pos.x / FIGURE_SIZE.x);
-	spacePos.y = (int)(pos.y / FIGURE_SIZE.y);
-	space* sp = getSpace(spacePos);
-	if (_selected)
-	{
-
-	}
-	else
-	{
-		_selected = sp;
-		if (sp)
-		{
-			
-		}
-	}
-}
-
-void Board::moved(Event* event)
-{
-
-}
-
 spActor Board::getView()
 {
 	return _view;
@@ -214,5 +250,7 @@ spActor Board::getView()
 void Board::free()
 {
 	_field.clear();
+	_view->detach();
+	_view = 0;
 	_current = 0;
 }

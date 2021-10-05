@@ -31,7 +31,7 @@ private:
 	void createKings();
 
 	void update(const UpdateState& us);
-	void move(space& a, space& b);
+	spTween move(space& obj);
 	void touched(Event*);
 	void moved(Event*);
 
