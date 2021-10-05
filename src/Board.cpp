@@ -132,11 +132,11 @@ void Board::createPawns()
 	//create black
 	for (int j = 0; j < 8; ++j)
 	{
-		_field[64 - 8 - j].figure = new Figure(eColor::Black, eType::Pawn);
-		_field[64 - 8 - j].figure->init();
-		_field[64 - 8 - j].figure->setPos(160 + _field[63 - 8 - j].pos.x * FIGURE_SIZE.x,
+		_field[63 - 8 - j].figure = new Figure(eColor::Black, eType::Pawn);
+		_field[63 - 8 - j].figure->init();
+		_field[63 - 8 - j].figure->setPos(160 + _field[63 - 8 - j].pos.x * FIGURE_SIZE.x,
 			_field[63 - 8 - j].pos.y * FIGURE_SIZE.y);
-		_field[64 - 8 - j].figure->getView()->attachTo(getStage());
+		_field[63 - 8 - j].figure->getView()->attachTo(getStage());
 	}
 }
 

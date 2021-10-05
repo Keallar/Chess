@@ -101,13 +101,13 @@ void Figure::exploded(Event* ev)
 
 void Figure::select()
 {
-	_view->addTween(Actor::TweenRotation(1), 500, -1, true);
+	_view->addTween(Actor::TweenScale(1.1f), 500, -1, true);
 }
 
 void Figure::unselect()
 {
 	_view->removeTweens(false);
-	_view->addTween(Actor::TweenRotation(0), 250);
+	_view->addTween(Actor::TweenScale(1.0f), 250);
 }
 
 void Figure::setPos(const float x, const float y)
