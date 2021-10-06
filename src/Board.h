@@ -45,6 +45,10 @@ private:
 
 	space* checkFigure(Point& objPos);
 	void changeTurn();
+	void checkWin();
+
+	void movePawn(space* sp, bool coll = false);
+	void moveRock(space* sp, bool coll = false);
 
 	spSprite _view;
 	std::vector<space> _field;
@@ -52,7 +56,10 @@ private:
 	Point _size;
 	spTween _current;
 	bool _isTurned;
+	bool _isEnded;
 
 	eTurn _turn;
+
+	spTextField _text;
 };
 

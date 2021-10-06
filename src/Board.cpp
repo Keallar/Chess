@@ -1,8 +1,9 @@
 #include <iostream>
 #include "Board.h"
+#include "shared.h"
 
-const Point dirUp(0, -1);
-const Point dirDown(0, 1);
+const Point dirUp(0, 1);
+const Point dirDown(0, -1);
 const Point dirLeft(-1, 0);
 const Point dirRight(1, 0);
 const Point dirDiagLeftUp(-1, -1);
@@ -10,7 +11,7 @@ const Point dirDiagRightUp(1, -1);
 const Point dirDiagLeftDown(-1, 1);
 const Point dirDiagRightDown(1, 1);
 
-Board::Board() : _size(0, 0), _selected(0), _turn(eTurn::None), _isTurned(false)
+Board::Board() : _size(0, 0), _selected(0), _turn(eTurn::None), _isTurned(false), _isEnded(false)
 {
 }
 
@@ -78,11 +79,14 @@ space* Board::checkFigure(Point& objPos)
 
 void Board::update(const UpdateState& us)
 {
-	
+	checkWin();
 }
 
 void Board::touched(Event* event)
 {
+	if (_isEnded)
+		return;
+
 	TouchEvent* te = safeCast<TouchEvent*>(event);
 	Vector2 pos = te->localPosition;
 	Point spacePos;
@@ -97,13 +101,17 @@ void Board::touched(Event* event)
 			if (sp)
 			{
 				_selected->figure->unselect();
-				//Point dir = _selected->pos - sp->pos;
 				eType selectedType = _selected->figure->getType();
-				spTween tween = move(*_selected, *sp);
-				tween->setDoneCallback(CLOSURE(this, &Board::moved));
-				_selected = 0;
-				_isTurned = true;
-				changeTurn();
+				if (selectedType == eType::Pawn)
+					movePawn(sp);
+				else
+				{
+					spTween tween = move(*_selected, *sp);
+					tween->setDoneCallback(CLOSURE(this, &Board::moved));
+					_selected = 0;
+					_isTurned = true;
+					changeTurn();
+				}
 			}
 		}
 		else
@@ -114,11 +122,12 @@ void Board::touched(Event* event)
 				eColor spColor = sp->figure->getColor();
 				if (selectedColor != spColor)
 				{
-					space* exSp = checkFigure(spacePos);
-					exSp->figure->explode();
 					_selected->figure->unselect();
-					/*Point dir = _selected->pos - sp->pos;
-					eType selectedType = _selected->figure->getType();*/
+					eType selectedType = _selected->figure->getType();
+					space* exSp = checkFigure(spacePos);
+					if (exSp->figure->getType() == eType::King)
+						_isEnded = true;
+					exSp->figure->explode();
 					spTween tween = move(*_selected, *sp);
 					tween->setDoneCallback(CLOSURE(this, &Board::moved));
 					_selected = 0;
@@ -168,6 +177,7 @@ void Board::moved(Event* event)
 	swapData* sw = safeCast<swapData*>(data.get());
 	space& a = *sw->a;
 	space& b = *sw->b;
+	return;
 }
 
 bool Board::collision(Point& spacePos)
@@ -245,6 +255,78 @@ void Board::changeTurn()
 		_turn = eTurn::White;
 	}
 	_isTurned = false;
+}
+
+void Board::movePawn(space* sp, bool coll)
+{
+	eColor color = _selected->figure->getColor();
+	Point dir = _selected->pos - sp->pos;
+	if (color == eColor::White)
+	{
+		if (dir == dirDown || dir == Point(0, -2))
+		{
+			spTween tween = move(*_selected, *sp);
+			tween->setDoneCallback(CLOSURE(this, &Board::moved));
+			_selected = 0;
+			_isTurned = true;
+			changeTurn();
+		}
+	}
+	else if (color == eColor::Black)
+	{
+		if (dir == dirUp || dir == Point(0, 2))
+		{
+			spTween tween = move(*_selected, *sp);
+			tween->setDoneCallback(CLOSURE(this, &Board::moved));
+			_selected = 0;
+			_isTurned = true;
+			changeTurn();
+		}
+	}
+}
+
+void Board::moveRock(space* sp, bool coll)
+{
+	eColor color = _selected->figure->getColor();
+	Point dir = _selected->pos - sp->pos;
+	if (color == eColor::White)
+	{
+		if (dir.x <= dirDown.x && dir.y <= dirDown.y )
+		{
+			spTween tween = move(*_selected, *sp);
+			tween->setDoneCallback(CLOSURE(this, &Board::moved));
+			_selected = 0;
+			_isTurned = true;
+			changeTurn();
+		}
+	}
+	else if (color == eColor::Black)
+	{
+		if (dir == dirUp || dir == Point(0, 2))
+		{
+			spTween tween = move(*_selected, *sp);
+			tween->setDoneCallback(CLOSURE(this, &Board::moved));
+			_selected = 0;
+			_isTurned = true;
+			changeTurn();
+		}
+	}
+}
+
+void Board::checkWin()
+{
+	if (!_isEnded)
+		return;
+	if (!_text)
+	{
+		spTextField text = new TextField();
+		text->attachTo(getStage());
+		text->setPosition(getStage()->getSize() / 2);
+		TextStyle style = TextStyle(res.getResFont("main")).withColor(Color::White).alignMiddle();
+		text->setStyle(style);
+		text->setText("GAME OVER!");
+		_text = text;
+	}
 }
 
 void Board::createPawns()

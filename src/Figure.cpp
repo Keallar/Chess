@@ -114,7 +114,6 @@ void Figure::unselect()
 	_view->removeTweens(false);
 	_view->addTween(Actor::TweenScale(1.0f), 250);
 	_selected = false;
-	_isTurn = false;
 }
 
 void Figure::setPos(const float x, const float y)
