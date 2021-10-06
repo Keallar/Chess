@@ -124,15 +124,20 @@ void Board::touched(Event* event)
 				{
 					_selected->figure->unselect();
 					eType selectedType = _selected->figure->getType();
-					space* exSp = checkFigure(spacePos);
-					if (exSp->figure->getType() == eType::King)
-						_isEnded = true;
-					exSp->figure->explode();
-					spTween tween = move(*_selected, *sp);
-					tween->setDoneCallback(CLOSURE(this, &Board::moved));
-					_selected = 0;
-					_isTurned = true;
-					changeTurn();
+					if (selectedType == eType::Pawn)
+						movePawn(sp, true);
+					else
+					{
+						space* exSp = checkFigure(spacePos);
+						if (exSp->figure->getType() == eType::King)
+							_isEnded = true;
+						exSp->figure->explode();
+						spTween tween = move(*_selected, *sp);
+						tween->setDoneCallback(CLOSURE(this, &Board::moved));
+						_selected = 0;
+						_isTurned = true;
+						changeTurn();
+					}
 				}
 				else
 				{
@@ -265,6 +270,13 @@ void Board::movePawn(space* sp, bool coll)
 	{
 		if (dir == dirDown || dir == Point(0, -2))
 		{
+			if (coll)
+			{
+				space* exSp = checkFigure(sp->pos);
+				if (exSp->figure->getType() == eType::King)
+					_isEnded = true;
+				exSp->figure->explode();
+			}
 			spTween tween = move(*_selected, *sp);
 			tween->setDoneCallback(CLOSURE(this, &Board::moved));
 			_selected = 0;
@@ -276,6 +288,13 @@ void Board::movePawn(space* sp, bool coll)
 	{
 		if (dir == dirUp || dir == Point(0, 2))
 		{
+			if (coll)
+			{
+				space* exSp = checkFigure(sp->pos);
+				if (exSp->figure->getType() == eType::King)
+					_isEnded = true;
+				exSp->figure->explode();
+			}
 			spTween tween = move(*_selected, *sp);
 			tween->setDoneCallback(CLOSURE(this, &Board::moved));
 			_selected = 0;

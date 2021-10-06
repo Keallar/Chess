@@ -26,7 +26,6 @@ enum class eType
 class Figure : public Object
 {
 public:
-	Figure() = default;
 	Figure(eColor color, eType t);
 	void init();
 	void setPos(const float x, const float y);
