@@ -30,7 +30,7 @@ public:
 	Figure(eColor color, eType t);
 	void init();
 	void setPos(const float x, const float y);
-	void setIsTurn(bool state);
+	void setIsTurn(const bool state);
 	spActor getView() const;
 	eType getType() const;
 	eColor getColor() const;

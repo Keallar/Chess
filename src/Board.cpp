@@ -90,7 +90,7 @@ space* Board::checkFigure(Point& objPos)
 
 void Board::update(const UpdateState& us)
 {
-	//changeTurn();
+	
 }
 
 void Board::touched(Event* event)
@@ -114,15 +114,8 @@ void Board::touched(Event* event)
 				spTween tween = move(*_selected, *sp);
 				tween->setDoneCallback(CLOSURE(this, &Board::moved));
 				_selected = 0;
-				//if (_turn == eTurn::White)
-				//{
-				//	_turn = eTurn::Black;
-				//}
-				//else if (_turn == eTurn::Black)
-				//{
-				//	_turn = eTurn::White;
-				//}
-				//_isTurned = true;
+				/*_isTurned = true;
+				changeTurn();*/
 				if (selectedType == eType::Pawn)
 				{
 
@@ -163,15 +156,8 @@ void Board::touched(Event* event)
 				spTween tween = move(*_selected, *sp);
 				tween->setDoneCallback(CLOSURE(this, &Board::moved));
 				_selected = 0;
-				//if (_turn == eTurn::White)
-				//{
-				//	_turn = eTurn::Black;
-				//}
-				//else if (_turn == eTurn::Black)
-				//{
-				//	_turn = eTurn::White;
-				//}
-				//_isTurned = true;
+				/*_isTurned = true;
+				changeTurn();*/
 			}
 			else
 			{
@@ -246,16 +232,23 @@ void Board::changeTurn()
 			for (int x = 0; x < _size.x; ++x)
 			{
 				space* sp = getSpace(Point(x, y));
-				if (sp->figure->getColor() == eColor::White)
+				if (sp)
 				{
-					sp->figure->setIsTurn(true);
-				}
-				else
-				{
-					sp->figure->setIsTurn(false);
+					if (sp->figure)
+					{
+						if (sp->figure->getColor() == eColor::White)
+						{
+							sp->figure->setIsTurn(false);
+						}
+						else
+						{
+							sp->figure->setIsTurn(true);
+						}
+					}
 				}
 			}
 		}
+		_turn = eTurn::Black;
 	}
 	else if (_turn == eTurn::Black)
 	{
@@ -264,16 +257,23 @@ void Board::changeTurn()
 			for (int x = 0; x < _size.x; ++x)
 			{
 				space* sp = getSpace(Point(x, y));
-				if (sp->figure->getColor() == eColor::White)
+				if (sp)
 				{
-					sp->figure->setIsTurn(true);
-				}
-				else
-				{
-					sp->figure->setIsTurn(false);
+					if (sp->figure)
+					{
+						if (sp->figure->getColor() == eColor::Black)
+						{
+							sp->figure->setIsTurn(false);
+						}
+						else
+						{
+							sp->figure->setIsTurn(true);
+						}
+					}
 				}
 			}
 		}
+		_turn = eTurn::White;
 	}
 	_isTurned = false;
 }
@@ -287,6 +287,7 @@ void Board::createPawns()
 		_field[8 + i].figure->init();
 		_field[8 + i].figure->setPos(160 + _field[8 + i].pos.x * FIGURE_SIZE.x,
 			_field[8 + i].pos.y * FIGURE_SIZE.y);
+		_field[8 + i].figure->setIsTurn(true);
 		_field[8 + i].figure->getView()->attachTo(getStage());
 	}
 	//create black
@@ -307,11 +308,13 @@ void Board::createRocks()
 	_field[0].figure->init();
 	_field[0].figure->setPos(160 + _field[0].pos.x * FIGURE_SIZE.x,
 		_field[0].pos.y * FIGURE_SIZE.y);
+	_field[0].figure->setIsTurn(true);
 	_field[0].figure->getView()->attachTo(getStage());
 	_field[7].figure = new Figure(eColor::White, eType::Rock);
 	_field[7].figure->init();
 	_field[7].figure->setPos(160 + _field[7].pos.x * FIGURE_SIZE.x,
 		_field[7].pos.y * FIGURE_SIZE.y);
+	_field[7].figure->setIsTurn(true);
 	_field[7].figure->getView()->attachTo(getStage());
 	//create black
 	_field[56].figure = new Figure(eColor::Black, eType::Rock);
@@ -333,11 +336,13 @@ void Board::createBishops()
 	_field[2].figure->init();
 	_field[2].figure->setPos(160 + _field[2].pos.x * FIGURE_SIZE.x,
 		_field[2].pos.y * FIGURE_SIZE.y);
+	_field[2].figure->setIsTurn(true);
 	_field[2].figure->getView()->attachTo(getStage());
 	_field[5].figure = new Figure(eColor::White, eType::Bishop);
 	_field[5].figure->init();
 	_field[5].figure->setPos(160 + _field[5].pos.x * FIGURE_SIZE.x,
 		_field[5].pos.y * FIGURE_SIZE.y);
+	_field[5].figure->setIsTurn(true);
 	_field[5].figure->getView()->attachTo(getStage());
 	//create black
 	_field[58].figure = new Figure(eColor::Black, eType::Bishop);
@@ -359,11 +364,13 @@ void Board::createKnights()
 	_field[1].figure->init();
 	_field[1].figure->setPos(160 + _field[1].pos.x * FIGURE_SIZE.x,
 		_field[1].pos.y * FIGURE_SIZE.y);
+	_field[1].figure->setIsTurn(true);
 	_field[1].figure->getView()->attachTo(getStage());
 	_field[6].figure = new Figure(eColor::White, eType::Knight);
 	_field[6].figure->init();
 	_field[6].figure->setPos(160 + _field[6].pos.x * FIGURE_SIZE.x,
 		_field[6].pos.y * FIGURE_SIZE.y);
+	_field[6].figure->setIsTurn(true);
 	_field[6].figure->getView()->attachTo(getStage());
 	//create black
 	_field[57].figure = new Figure(eColor::Black, eType::Knight);
@@ -386,6 +393,7 @@ void Board::createQueens()
 	_field[3].figure->init();
 	_field[3].figure->setPos(160 + _field[3].pos.x * FIGURE_SIZE.x,
 		_field[3].pos.y * FIGURE_SIZE.y);
+	_field[3].figure->setIsTurn(true);
 	_field[3].figure->getView()->attachTo(getStage());
 	//create black
 	_field[59].figure = new Figure(eColor::Black, eType::Queen);
@@ -403,6 +411,7 @@ void Board::createKings()
 	_field[4].figure->init();
 	_field[4].figure->setPos(160 + _field[4].pos.x * FIGURE_SIZE.x,
 		_field[4].pos.y * FIGURE_SIZE.y);
+	_field[4].figure->setIsTurn(true);
 	_field[4].figure->getView()->attachTo(getStage());
 	//create black
 	_field[60].figure = new Figure(eColor::Black, eType::King);
