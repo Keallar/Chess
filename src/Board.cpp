@@ -34,7 +34,7 @@ void Board::init(int w, int h)
 	createQueens();
 	createKings();
 
-	turn = eTurn::White;	
+	turn = eTurn::White;
 
 	_view->setSize(_size.x * FIGURE_SIZE.x, _size.y * FIGURE_SIZE.y);
 	_view->addEventListener(TouchEvent::TOUCH_DOWN, CLOSURE(this, &Board::touched));
@@ -71,7 +71,7 @@ space* Board::getSpace(const Point& pos, bool check)
 	return &sp;
 }
 
-space* Board::collWithOpFigure(space& obj)
+space* Board::checkFigure(space& obj)
 {
 	if (!obj.figure)
 		return nullptr;
@@ -123,7 +123,7 @@ void Board::update(const UpdateState& us)
 			space* sp = getSpace(Point(x, y));
 			if (!sp)
 				continue;
-			space* exSp = collWithOpFigure(*sp);
+			space* exSp = checkFigure(*sp);
 			if (exSp)
 				exSp->figure->explode();
 		}
@@ -150,7 +150,6 @@ void Board::touched(Event* event)
 				eType selectedType = _selected->figure->getType();
 				spTween tween = move(*_selected, *sp);
 				tween->setDoneCallback(CLOSURE(this, &Board::moved));
-				collWithOpFigure(*_selected);
 				_selected = 0;
 				if (selectedType == eType::Pawn)
 				{
@@ -176,6 +175,25 @@ void Board::touched(Event* event)
 				{
 
 				}
+			}
+		}
+		else
+		{
+			eColor selectedColor = _selected->figure->getColor();
+			eColor spColor = sp->figure->getColor();
+			if (selectedColor != spColor)
+			{
+				_selected->figure->unselect();
+				Point dir = _selected->pos - sp->pos;
+				eType selectedType = _selected->figure->getType();
+				spTween tween = move(*_selected, *sp);
+				tween->setDoneCallback(CLOSURE(this, &Board::moved));
+				_selected = 0;
+			}
+			else
+			{
+				_selected->figure->unselect();
+				_selected = 0;
 			}
 		}
 	}
@@ -225,14 +243,9 @@ bool Board::collision(Point& spacePos)
 				return false;
 			if (!_selected)
 				return false;
-			eColor selectedColor = _selected->figure->getColor();
-			eColor spColor = sp->figure->getColor();
-			if (selectedColor == spColor)
+			if (spacePos == sp->pos)
 			{
-				if (spacePos == sp->pos)
-				{
-					return true;
-				}
+				return true;
 			}
 		}
 	}
