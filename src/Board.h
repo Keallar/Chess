@@ -28,7 +28,7 @@ public:
 	void free();
 	spActor getView();
 private:
-	space* getSpace(const Point& pos, bool check = true);
+	space* getSpace(const Point& pos);
 
 	void createPawns();
 	void createRocks();

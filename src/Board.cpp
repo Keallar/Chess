@@ -49,25 +49,13 @@ struct swapData : public Object
 	space* b;
 };
 
-space* Board::getSpace(const Point& pos, bool check)
+space* Board::getSpace(const Point& pos)
 {
 	if (pos.x < 0 || pos.y < 0)
 		return 0;
 	if (pos.x > _size.x || pos.y > _size.y)
 		return 0;
 	space& sp = _field[pos.x + pos.y * _size.x];
-	if (check)
-	{
-		if (sp.figure)
-		{
-			if (sp.figure->isDead())
-				return 0;
-			if (sp.figure->isExploiding())
-				return 0;
-			if (sp.figure->isMoving())
-				return 0;
-		}
-	}
 	return &sp;
 }
 
@@ -116,53 +104,32 @@ void Board::touched(Event* event)
 				_selected = 0;
 				/*_isTurned = true;
 				changeTurn();*/
-				if (selectedType == eType::Pawn)
-				{
-
-				}
-				else if (selectedType == eType::Rock)
-				{
-
-				}
-				else if (selectedType == eType::Bishop)
-				{
-
-				}
-				else if (selectedType == eType::Knight)
-				{
-
-				}
-				else if (selectedType == eType::Queen)
-				{
-
-				}
-				else if (selectedType == eType::King)
-				{
-
-				}
 			}
 		}
 		else
 		{
-			eColor selectedColor = _selected->figure->getColor();
-			eColor spColor = sp->figure->getColor();
-			if (selectedColor != spColor)
+			if (sp)
 			{
-				space* exSp = checkFigure(spacePos);
-				exSp->figure->explode();
-				_selected->figure->unselect();
-				/*Point dir = _selected->pos - sp->pos;
-				eType selectedType = _selected->figure->getType();*/
-				spTween tween = move(*_selected, *sp);
-				tween->setDoneCallback(CLOSURE(this, &Board::moved));
-				_selected = 0;
-				/*_isTurned = true;
-				changeTurn();*/
-			}
-			else
-			{
-				_selected->figure->unselect();
-				_selected = 0;
+				eColor selectedColor = _selected->figure->getColor();
+				eColor spColor = sp->figure->getColor();
+				if (selectedColor != spColor)
+				{
+					space* exSp = checkFigure(spacePos);
+					exSp->figure->explode();
+					_selected->figure->unselect();
+					/*Point dir = _selected->pos - sp->pos;
+					eType selectedType = _selected->figure->getType();*/
+					spTween tween = move(*_selected, *sp);
+					tween->setDoneCallback(CLOSURE(this, &Board::moved));
+					_selected = 0;
+					/*_isTurned = true;
+					changeTurn();*/
+				}
+				else
+				{
+					_selected->figure->unselect();
+					_selected = 0;
+				}
 			}
 		}
 	}
@@ -210,12 +177,14 @@ bool Board::collision(Point& spacePos)
 		for (int x = 0; x < _size.x; ++x)
 		{
 			space* sp = getSpace(Point(x, y));
-			if (!sp->figure)
-				return false;
-			if (!_selected)
-				return false;
-			if (spacePos == sp->pos)
-				return true;
+			if (sp)
+			{
+				if (sp->figure)
+				{
+					if (spacePos == sp->pos)
+						return true;
+				}
+			}
 		}
 	}
 	return false;
