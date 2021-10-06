@@ -39,6 +39,7 @@ private:
 
 	void update(const UpdateState& us);
 	spTween move(space& obj, space& nPos);
+	bool collision(Point& spacePos);
 	void touched(Event*);
 	void moved(Event*);
 

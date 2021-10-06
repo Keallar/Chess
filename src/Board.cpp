@@ -76,25 +76,22 @@ space* Board::collWithOpFigure(space& obj)
 	if (!obj.figure)
 		return nullptr;
 
-	if (obj.figure->isSelected())
+	Point objPos = obj.pos;
+	eColor objColor = obj.figure->getColor();
+	for (int y = 0; y < _size.y; ++y)
 	{
-		Point objPos = obj.pos;
-		eColor objColor = obj.figure->getColor();
-		for (int y = 0; y < _size.y; ++y)
+		for (int x = 0; x < _size.x; ++x)
 		{
-			for (int x = 0; x < _size.x; ++x)
+			space& opSp = _field[x * y + _size.x];
+			if (opSp.figure)
 			{
-				space& opSp = _field[x * y + _size.x];
-				if (opSp.figure)
+				eColor opColor = opSp.figure->getColor();
+				if (objColor != opColor)
 				{
-					eColor opColor = opSp.figure->getColor();
-					if (objColor != opColor)
+					Point opPos = opSp.pos;
+					if (objPos == opPos)
 					{
-						Point opPos = opSp.pos;
-						if (objPos == opPos)
-						{
-							return &opSp;
-						}
+						return &opSp;
 					}
 				}
 			}
@@ -143,37 +140,42 @@ void Board::touched(Event* event)
 	space* sp = getSpace(spacePos);
 	if (_selected)
 	{
-		if (sp)
+		bool col = collision(spacePos);
+		if (!col)
 		{
-			_selected->figure->unselect();
-			Point dir = _selected->pos - sp->pos;
-			eType selectedType = _selected->figure->getType();
-			spTween tween = move(*_selected, *sp);
-			tween->setDoneCallback(CLOSURE(this, &Board::moved));
-			_selected = 0;
-			if (selectedType == eType::Pawn)
+			if (sp)
 			{
+				_selected->figure->unselect();
+				Point dir = _selected->pos - sp->pos;
+				eType selectedType = _selected->figure->getType();
+				spTween tween = move(*_selected, *sp);
+				tween->setDoneCallback(CLOSURE(this, &Board::moved));
+				collWithOpFigure(*_selected);
+				_selected = 0;
+				if (selectedType == eType::Pawn)
+				{
 
-			}
-			else if (selectedType == eType::Rock)
-			{
+				}
+				else if (selectedType == eType::Rock)
+				{
 
-			}
-			else if (selectedType == eType::Bishop)
-			{
+				}
+				else if (selectedType == eType::Bishop)
+				{
 
-			}
-			else if (selectedType == eType::Knight)
-			{
+				}
+				else if (selectedType == eType::Knight)
+				{
 
-			}
-			else if (selectedType == eType::Queen)
-			{
+				}
+				else if (selectedType == eType::Queen)
+				{
 
-			}
-			else if (selectedType == eType::King)
-			{
+				}
+				else if (selectedType == eType::King)
+				{
 
+				}
 			}
 		}
 	}
@@ -210,6 +212,31 @@ void Board::moved(Event* event)
 	space& a = *sw->a;
 	space& b = *sw->b;
 	//std::swap(a.pos, b.pos);
+}
+
+bool Board::collision(Point& spacePos)
+{
+	for (int y = 0; y < _size.y; ++y)
+	{
+		for (int x = 0; x < _size.x; ++x)
+		{
+			space* sp = getSpace(Point(x, y));
+			if (!sp->figure)
+				return false;
+			if (!_selected)
+				return false;
+			eColor selectedColor = _selected->figure->getColor();
+			eColor spColor = sp->figure->getColor();
+			if (selectedColor == spColor)
+			{
+				if (spacePos == sp->pos)
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 }
 
 void Board::createPawns()
