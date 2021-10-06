@@ -44,13 +44,15 @@ private:
 	void moved(Event*);
 
 	space* checkFigure(Point& objPos);
+	void changeTurn();
 
 	spSprite _view;
 	std::vector<space> _field;
 	space* _selected;
 	Point _size;
 	spTween _current;
+	bool _isTurned;
 
-	eTurn turn;
+	eTurn _turn;
 };
 

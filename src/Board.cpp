@@ -10,7 +10,7 @@ const Point dirDiagRightUp(1, -1);
 const Point dirDiagLeftDown(-1, 1);
 const Point dirDiagRightDown(1, 1);
 
-Board::Board() : _size(0, 0), _selected(0), turn(eTurn::None)
+Board::Board() : _size(0, 0), _selected(0), _turn(eTurn::None), _isTurned(false)
 {
 }
 
@@ -34,7 +34,7 @@ void Board::init(int w, int h)
 	createQueens();
 	createKings();
 
-	turn = eTurn::White;
+	_turn = eTurn::White;
 
 	_view->setSize(_size.x * FIGURE_SIZE.x, _size.y * FIGURE_SIZE.y);
 	_view->addEventListener(TouchEvent::TOUCH_DOWN, CLOSURE(this, &Board::touched));
@@ -64,8 +64,8 @@ space* Board::getSpace(const Point& pos, bool check)
 				return 0;
 			if (sp.figure->isExploiding())
 				return 0;
-			/*if (sp.figure->isMoving())
-				return 0;*/
+			if (sp.figure->isMoving())
+				return 0;
 		}
 	}
 	return &sp;
@@ -90,32 +90,7 @@ space* Board::checkFigure(Point& objPos)
 
 void Board::update(const UpdateState& us)
 {
-	//check isDead for figures
-	/*for (int y = 0; y < _size.y; ++y)
-	{
-		for (int x = 0; x < _size.x; ++x)
-		{
-			space& sp = _field[x * y + _size.x];
-			spFigure tempFig = sp.figure;
-			if (!tempFig)
-				continue;
-			if (tempFig->isDead())
-				sp.figure = 0;
-		}
-	}*/
-	//collision with opponent figures
-	/*for (int y = 0; y < _size.y; ++y)
-	{
-		for (int x = 0; x < _size.x; ++x)
-		{
-			space* sp = getSpace(Point(x, y));
-			if (!sp)
-				continue;
-			space* exSp = checkFigure(sp);
-			if (exSp)
-				exSp->figure->explode();
-		}
-	}*/
+	//changeTurn();
 }
 
 void Board::touched(Event* event)
@@ -139,6 +114,15 @@ void Board::touched(Event* event)
 				spTween tween = move(*_selected, *sp);
 				tween->setDoneCallback(CLOSURE(this, &Board::moved));
 				_selected = 0;
+				//if (_turn == eTurn::White)
+				//{
+				//	_turn = eTurn::Black;
+				//}
+				//else if (_turn == eTurn::Black)
+				//{
+				//	_turn = eTurn::White;
+				//}
+				//_isTurned = true;
 				if (selectedType == eType::Pawn)
 				{
 
@@ -173,13 +157,21 @@ void Board::touched(Event* event)
 			{
 				space* exSp = checkFigure(spacePos);
 				exSp->figure->explode();
-				//exSp->figure = 0;
 				_selected->figure->unselect();
 				/*Point dir = _selected->pos - sp->pos;
 				eType selectedType = _selected->figure->getType();*/
 				spTween tween = move(*_selected, *sp);
 				tween->setDoneCallback(CLOSURE(this, &Board::moved));
 				_selected = 0;
+				//if (_turn == eTurn::White)
+				//{
+				//	_turn = eTurn::Black;
+				//}
+				//else if (_turn == eTurn::Black)
+				//{
+				//	_turn = eTurn::White;
+				//}
+				//_isTurned = true;
 			}
 			else
 			{
@@ -192,11 +184,14 @@ void Board::touched(Event* event)
 	{
 		if (sp->figure)
 		{
-			_selected = sp;
-			if (sp)
-			{
-				sp->figure->select();
-			}
+			/*if (sp->figure->isTurn())
+			{*/
+				_selected = sp;
+				if (sp)
+				{
+					sp->figure->select();
+				}
+			//}
 		}
 	}
 }
@@ -220,7 +215,6 @@ void Board::moved(Event* event)
 	swapData* sw = safeCast<swapData*>(data.get());
 	space& a = *sw->a;
 	space& b = *sw->b;
-	//std::swap(a.pos, b.pos);
 }
 
 bool Board::collision(Point& spacePos)
@@ -235,12 +229,53 @@ bool Board::collision(Point& spacePos)
 			if (!_selected)
 				return false;
 			if (spacePos == sp->pos)
-			{
 				return true;
-			}
 		}
 	}
 	return false;
+}
+
+void Board::changeTurn()
+{
+	if (!_isTurned)
+		return;
+	if (_turn == eTurn::White)
+	{
+		for (int y = 0; y < _size.y; ++y)
+		{
+			for (int x = 0; x < _size.x; ++x)
+			{
+				space* sp = getSpace(Point(x, y));
+				if (sp->figure->getColor() == eColor::White)
+				{
+					sp->figure->setIsTurn(true);
+				}
+				else
+				{
+					sp->figure->setIsTurn(false);
+				}
+			}
+		}
+	}
+	else if (_turn == eTurn::Black)
+	{
+		for (int y = 0; y < _size.y; ++y)
+		{
+			for (int x = 0; x < _size.x; ++x)
+			{
+				space* sp = getSpace(Point(x, y));
+				if (sp->figure->getColor() == eColor::White)
+				{
+					sp->figure->setIsTurn(true);
+				}
+				else
+				{
+					sp->figure->setIsTurn(false);
+				}
+			}
+		}
+	}
+	_isTurned = false;
 }
 
 void Board::createPawns()
@@ -388,4 +423,5 @@ void Board::free()
 	_view->detach();
 	_view = 0;
 	_current = 0;
+	_selected = 0;
 }

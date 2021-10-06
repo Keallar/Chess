@@ -30,6 +30,7 @@ public:
 	Figure(eColor color, eType t);
 	void init();
 	void setPos(const float x, const float y);
+	void setIsTurn(bool state);
 	spActor getView() const;
 	eType getType() const;
 	eColor getColor() const;
@@ -37,6 +38,7 @@ public:
 	bool isDead() const;
 	bool isMoving() const;
 	bool isSelected() const;
+	bool isTurn() const;
 	void select();
 	void unselect();
 	spTween move(const Vector2& pos);
@@ -49,6 +51,7 @@ private:
 	bool _dead;
 	bool _moving;
 	bool _exploiding;
+	bool _isTurn;
 	eColor _color;
 	eType _type;
 	spSprite _view;

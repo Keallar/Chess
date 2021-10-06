@@ -3,7 +3,8 @@
 
 const Vector2 FIGURE_SIZE(80, 80);
 
-Figure::Figure(eColor color, eType t) : _dead(false), _moving(false), _exploiding(false), _selected(false)
+Figure::Figure(eColor color, eType t) : _dead(false), _moving(false), _exploiding(false),
+_selected(false), _isTurn(false)
 {
 	_color = color;
 	_type = t;
@@ -120,6 +121,11 @@ void Figure::setPos(const float x, const float y)
 	_view->setPosition(x, y);
 }
 
+void Figure::setIsTurn(bool state)
+{
+	_isTurn = state;
+}
+
 bool Figure::isSelected() const
 {
 	return _selected;
@@ -138,6 +144,11 @@ bool Figure::isDead() const
 bool Figure::isExploiding() const
 {
 	return _exploiding;
+}
+
+bool Figure::isTurn() const
+{
+	return _isTurn;
 }
 
 eType Figure::getType() const
