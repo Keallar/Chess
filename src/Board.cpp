@@ -64,46 +64,34 @@ space* Board::getSpace(const Point& pos, bool check)
 				return 0;
 			if (sp.figure->isExploiding())
 				return 0;
-			if (sp.figure->isMoving())
-				return 0;
+			/*if (sp.figure->isMoving())
+				return 0;*/
 		}
 	}
 	return &sp;
 }
 
-space* Board::checkFigure(space& obj)
+space* Board::checkFigure(Point& objPos)
 {
-	if (!obj.figure)
-		return nullptr;
-
-	Point objPos = obj.pos;
-	eColor objColor = obj.figure->getColor();
 	for (int y = 0; y < _size.y; ++y)
 	{
 		for (int x = 0; x < _size.x; ++x)
 		{
-			space& opSp = _field[x * y + _size.x];
-			if (opSp.figure)
+			space* sp = getSpace(Point(x, y));
+			if (objPos == sp->pos)
 			{
-				eColor opColor = opSp.figure->getColor();
-				if (objColor != opColor)
-				{
-					Point opPos = opSp.pos;
-					if (objPos == opPos)
-					{
-						return &opSp;
-					}
-				}
+				if (!sp->figure)
+					return nullptr;
+				return sp;
 			}
 		}
 	}
-	return nullptr;
 }
 
 void Board::update(const UpdateState& us)
 {
 	//check isDead for figures
-	for (int y = 0; y < _size.y; ++y)
+	/*for (int y = 0; y < _size.y; ++y)
 	{
 		for (int x = 0; x < _size.x; ++x)
 		{
@@ -114,20 +102,20 @@ void Board::update(const UpdateState& us)
 			if (tempFig->isDead())
 				sp.figure = 0;
 		}
-	}
+	}*/
 	//collision with opponent figures
-	for (int y = 0; y < _size.y; ++y)
+	/*for (int y = 0; y < _size.y; ++y)
 	{
 		for (int x = 0; x < _size.x; ++x)
 		{
 			space* sp = getSpace(Point(x, y));
 			if (!sp)
 				continue;
-			space* exSp = checkFigure(*sp);
+			space* exSp = checkFigure(sp);
 			if (exSp)
 				exSp->figure->explode();
 		}
-	}
+	}*/
 }
 
 void Board::touched(Event* event)
@@ -146,7 +134,7 @@ void Board::touched(Event* event)
 			if (sp)
 			{
 				_selected->figure->unselect();
-				Point dir = _selected->pos - sp->pos;
+				//Point dir = _selected->pos - sp->pos;
 				eType selectedType = _selected->figure->getType();
 				spTween tween = move(*_selected, *sp);
 				tween->setDoneCallback(CLOSURE(this, &Board::moved));
@@ -183,9 +171,12 @@ void Board::touched(Event* event)
 			eColor spColor = sp->figure->getColor();
 			if (selectedColor != spColor)
 			{
+				space* exSp = checkFigure(spacePos);
+				exSp->figure->explode();
+				//exSp->figure = 0;
 				_selected->figure->unselect();
-				Point dir = _selected->pos - sp->pos;
-				eType selectedType = _selected->figure->getType();
+				/*Point dir = _selected->pos - sp->pos;
+				eType selectedType = _selected->figure->getType();*/
 				spTween tween = move(*_selected, *sp);
 				tween->setDoneCallback(CLOSURE(this, &Board::moved));
 				_selected = 0;

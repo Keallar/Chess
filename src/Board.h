@@ -43,7 +43,7 @@ private:
 	void touched(Event*);
 	void moved(Event*);
 
-	space* checkFigure(space& obj);
+	space* checkFigure(Point& objPos);
 
 	spSprite _view;
 	std::vector<space> _field;
