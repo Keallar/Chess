@@ -102,8 +102,8 @@ void Board::touched(Event* event)
 				spTween tween = move(*_selected, *sp);
 				tween->setDoneCallback(CLOSURE(this, &Board::moved));
 				_selected = 0;
-				/*_isTurned = true;
-				changeTurn();*/
+				_isTurned = true;
+				changeTurn();
 			}
 		}
 		else
@@ -122,8 +122,8 @@ void Board::touched(Event* event)
 					spTween tween = move(*_selected, *sp);
 					tween->setDoneCallback(CLOSURE(this, &Board::moved));
 					_selected = 0;
-					/*_isTurned = true;
-					changeTurn();*/
+					_isTurned = true;
+					changeTurn();
 				}
 				else
 				{
@@ -137,14 +137,14 @@ void Board::touched(Event* event)
 	{
 		if (sp->figure)
 		{
-			/*if (sp->figure->isTurn())
-			{*/
+			if (sp->figure->isTurn())
+			{
 				_selected = sp;
 				if (sp)
 				{
 					sp->figure->select();
 				}
-			//}
+			}
 		}
 	}
 }
